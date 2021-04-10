@@ -1,209 +1,138 @@
 import Head from 'next/head'
+import Link from 'next/link'
+import Layout, { siteTitle } from '../components/layout'
+import utilStyles from '../styles/utils.module.css'
+// import '../styles/index.css'
+import React, { useState} from 'react'
 
-export default function Home() {
+function Home() {
+  const [itemName, setItemName]=useState('');
+  const [payDutch, setPayDutch]=useState('');
+  const [countPay, setCountPay]=useState(1);
+  const [assetSum, setAssetSum]=useState();
+  const [assetBox, setAssetBox]=useState([]);
+  const [itemsToPay, setItemsToPay]=useState([]);
+  const handleItemChange = e => setItemName(e.target.value);
+  const handlePayChange = e => setPayDutch(e.target.value);
+  const handleClick = (e) =>{
+    e.preventDefault(); // デフォルトのうざい挙動を防ぐ
+    if (!itemName || !payDutch)
+    {
+      alert('入力してください')
+    return
+    }else if(!Number(payDutch))
+    {
+      alert('支払額は半角数字を入力してください')
+    return
+    }
+    setCountPay(countPay+1)
+    console.log(countPay)
+      itemsToPay.unshift({
+        id:countPay,
+        item:itemName,
+        asset:payDutch
+      })
+      let myMoney=Number(payDutch/2)
+      assetBox.unshift(myMoney)
+      let total = assetBox.reduce((sum, element) => sum + element, 0);
+      console.log('sum',assetBox, total)
+      setAssetSum(total)
+      // localStorage.setItem(localStorageKey,items)
+      // setItemName('');
+      // setPayDutch('');
+      // setItemsToPay([
+
+      //   {
+      //     id:1,
+      //     item:'rent',
+      //     asset:30000
+      //   },
+      //   {
+      //     id:2,
+      //     item:'foods',
+      //     asset:2000
+      //   },
+      //   {
+      //     id:3,
+      //     item:'foods',
+      //     asset:2
+      //   }
+      // ])
+  }
+
+  let itemsList=
+    itemsToPay.map((value)=>{
+      let myMoney=Number(value.asset/2)
+      var today=new Date(); 
+      var year = today.getFullYear()
+      var month = today.getMonth()
+      var day = today.getDate();
+      // var hour = today.getHours();
+      
+
+      return(
+      // <div className='list'>
+      
+          <tr align="center" id={value.id} >
+            <td> {year}/{month}/{day}</td>
+            <td>{value.item}</td>
+            <td>{myMoney}円</td>
+            <td>-{myMoney}円</td>
+            {/* <button>remove</button> */}
+          </tr>
+      // </div>
+    )
+  });
   return (
     <div className="container">
+      <Layout>
       <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
+        <title>Dashboard-SHAM</title>
       </Head>
-
-      <main>
-        <h1 className="title">
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
-        <p className="description">
-          Get started by editing <code>pages/index.js</code>
-        </p>
-
-        <div className="grid">
-          <a href="https://nextjs.org/docs" className="card">
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className="card">
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className="card"
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className="card"
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+        <section className={utilStyles.headingMd}>
+        <h2>ダッシュボード</h2>
+        <div className='input-container'>
+          <input placeholder='項目' onChange={handleItemChange} />
+          <input placeholder='支払額' onChange={handlePayChange} />
+          <button onClick={handleClick} >追加</button>
         </div>
-      </main>
 
+        <div className='list-container'>
+          <div className='sum-container'>
+
+          </div>
+          <div className='list-container'>
+            {console.log(itemsToPay)}
+            {console.log(itemsList)}
+
+            <tabel border="1">
+              <tr align="center">
+                <th>合計</th>
+                <th></th>
+                <th>つくしが碩介に{assetSum}円払う</th>
+                <th></th>
+              </tr>
+              <tr align="center">
+              {/* className={utilStyles.day} */}
+                <th>日時</th>
+                <th>項目</th>
+                <th className="icon hiro">ひろすけ</th>
+                <th className="icon tsuku">つくし</th>
+              </tr>
+              {itemsList}
+            </tabel>
+          </div>
+        </div>
+        
+      </section>
       <footer>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className="logo" />
-        </a>
-      </footer>
-
-      <style jsx>{`
-        .container {
-          min-height: 100vh;
-          padding: 0 0.5rem;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-        }
-
-        main {
-          padding: 5rem 0;
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-        }
-
-        footer {
-          width: 100%;
-          height: 100px;
-          border-top: 1px solid #eaeaea;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-
-        footer img {
-          margin-left: 0.5rem;
-        }
-
-        footer a {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-
-        a {
-          color: inherit;
-          text-decoration: none;
-        }
-
-        .title a {
-          color: #0070f3;
-          text-decoration: none;
-        }
-
-        .title a:hover,
-        .title a:focus,
-        .title a:active {
-          text-decoration: underline;
-        }
-
-        .title {
-          margin: 0;
-          line-height: 1.15;
-          font-size: 4rem;
-        }
-
-        .title,
-        .description {
-          text-align: center;
-        }
-
-        .description {
-          line-height: 1.5;
-          font-size: 1.5rem;
-        }
-
-        code {
-          background: #fafafa;
-          border-radius: 5px;
-          padding: 0.75rem;
-          font-size: 1.1rem;
-          font-family: Menlo, Monaco, Lucida Console, Liberation Mono,
-            DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace;
-        }
-
-        .grid {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-wrap: wrap;
-
-          max-width: 800px;
-          margin-top: 3rem;
-        }
-
-        .card {
-          margin: 1rem;
-          flex-basis: 45%;
-          padding: 1.5rem;
-          text-align: left;
-          color: inherit;
-          text-decoration: none;
-          border: 1px solid #eaeaea;
-          border-radius: 10px;
-          transition: color 0.15s ease, border-color 0.15s ease;
-        }
-
-        .card:hover,
-        .card:focus,
-        .card:active {
-          color: #0070f3;
-          border-color: #0070f3;
-        }
-
-        .card h3 {
-          margin: 0 0 1rem 0;
-          font-size: 1.5rem;
-        }
-
-        .card p {
-          margin: 0;
-          font-size: 1.25rem;
-          line-height: 1.5;
-        }
-
-        .logo {
-          height: 1em;
-        }
-
-        @media (max-width: 600px) {
-          .grid {
-            width: 100%;
-            flex-direction: column;
-          }
-        }
-      `}</style>
-
-      <style jsx global>{`
-        html,
-        body {
-          padding: 0;
-          margin: 0;
-          font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
-            Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue,
-            sans-serif;
-        }
-
-        * {
-          box-sizing: border-box;
-        }
-      `}</style>
+        <Link href="/login">
+          <a>login</a>
+        </Link>
+        </footer>
+      </Layout>
     </div>
   )
 }
+
+export default Home;
