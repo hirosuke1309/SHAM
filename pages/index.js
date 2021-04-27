@@ -3,18 +3,37 @@ import Link from 'next/link'
 import Layout, { siteTitle } from '../components/layout'
 import utilStyles from '../styles/utils.module.css'
 // import '../styles/index.css'
-import React, { useState} from 'react'
+import React, { useState,useEffect} from 'react'
+import firebase from 'firebase';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAwVKALvPB54x9_XDW7SfNfyYqPkHtaEbk",
+  authDomain: "sham-888d6.firebaseapp.com",
+  projectId: "sham-888d6",
+  storageBucket: "sham-888d6.appspot.com",
+  messagingSenderId: "526071859442",
+  appId: "1:526071859442:web:ca89b93df90e434dc0a86b",
+  measurementId: "G-GDSJMDWHMG"
+};
+if (firebase.apps.length === 0) {
+  firebase.initializeApp(firebaseConfig);
+}
+
+const db =firebase.firestore();
 
 function Home() {
   const [itemName, setItemName]=useState('');
   const [payDutch, setPayDutch]=useState('');
   const [countPay, setCountPay]=useState(1);
-  const [assetSum, setAssetSum]=useState();
+  const [assetSum, setAssetSum]=useState(0);
   const [assetBox, setAssetBox]=useState([]);
   const [itemsToPay, setItemsToPay]=useState([]);
   const handleItemChange = e => setItemName(e.target.value);
   const handlePayChange = e => setPayDutch(e.target.value);
-  const handleClick = (e) =>{
+  const payMoney=itemsToPay.map(value=>{
+    assetBox.unshift(Number(value.asset))
+  })
+  const handleClick = async(e) =>{
     e.preventDefault(); // デフォルトのうざい挙動を防ぐ
     if (!itemName || !payDutch)
     {
@@ -26,39 +45,56 @@ function Home() {
     return
     }
     setCountPay(countPay+1)
-    console.log(countPay)
-      itemsToPay.unshift({
-        id:countPay,
-        item:itemName,
-        asset:payDutch
-      })
-      let myMoney=Number(payDutch/2)
-      assetBox.unshift(myMoney)
+    console.log('COUNT',countPay)
+      // itemsToPay.unshift({
+      //   id:countPay,
+      //   item:itemName,
+      //   asset:payDutch
+      // })
+    await db.collection("pays").doc(String(countPay))
+        .set({
+          item:itemName,
+          asset:payDutch
+        })
+
+      // assetBox.unshift(Number(payDutch))
+      
+      
+      
+      // let myMoney=Number(payDutch/2)
+      // assetBox.unshift(myMoney)
+      // let total = assetBox.reduce((sum, element) => sum + element, 0);
+      // console.log('sum',assetBox, total)
+      // setAssetSum(total)
+      
+      setItemName('');
+      setPayDutch('');
+  }
+
+
+  useEffect(() => {
+    const unsubscribe = db.collection('pays').onSnapshot((querySnapshot) => {
+      console.log('検知!')
+      const _pays = querySnapshot.docs.map(value => {
+        // console.log('called')
+        return{
+          id: value.id,
+          ...value.data()
+        }
+      });
+      console.log('called',_pays)
+      setItemsToPay(_pays);
+
       let total = assetBox.reduce((sum, element) => sum + element, 0);
       console.log('sum',assetBox, total)
       setAssetSum(total)
-      // localStorage.setItem(localStorageKey,items)
-      // setItemName('');
-      // setPayDutch('');
-      // setItemsToPay([
+    })
+    const snapshot = await db.collection('sum').get();
 
-      //   {
-      //     id:1,
-      //     item:'rent',
-      //     asset:30000
-      //   },
-      //   {
-      //     id:2,
-      //     item:'foods',
-      //     asset:2000
-      //   },
-      //   {
-      //     id:3,
-      //     item:'foods',
-      //     asset:2
-      //   }
-      // ])
-  }
+    return()=>{
+      unsubscribe()
+    };
+},[]);
 
   let itemsList=
     itemsToPay.map((value)=>{
@@ -67,12 +103,7 @@ function Home() {
       var year = today.getFullYear()
       var month = today.getMonth()
       var day = today.getDate();
-      // var hour = today.getHours();
-      
-
       return(
-      // <div className='list'>
-      
           <tr align="center" id={value.id} >
             <td> {year}/{month}/{day}</td>
             <td>{value.item}</td>
@@ -80,9 +111,8 @@ function Home() {
             <td>-{myMoney}円</td>
             {/* <button>remove</button> */}
           </tr>
-      // </div>
-    )
-  });
+      )
+    });
   return (
     <div className="container">
       <Layout>
@@ -102,10 +132,10 @@ function Home() {
 
           </div>
           <div className='list-container'>
-            {console.log(itemsToPay)}
-            {console.log(itemsList)}
+            {console.log('item配列',itemsToPay)}
+            {/* {console.log(itemsList)} */}
 
-            <tabel border="1">
+            <table border="1">
               <tr align="center">
                 <th>合計</th>
                 <th></th>
@@ -120,7 +150,7 @@ function Home() {
                 <th className="icon tsuku">つくし</th>
               </tr>
               {itemsList}
-            </tabel>
+            </table>
           </div>
         </div>
         
